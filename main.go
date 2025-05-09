@@ -51,12 +51,12 @@ func NewChatRoom() *ChatRoom {
 }
 
 func startServer() {
-	port := "localhost:7020"
+	port := ":7020"
 	server := http.Server{
 		Addr:    port,
 		Handler: router,
 	}
-	log.Println("Serving on :", port)
+	log.Println("Serving on ", port)
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal("Failed to serve:", err)
 	}
@@ -70,7 +70,7 @@ func Join(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	chatBox.clientMap[id] = &Client{id: id, exists: true, receiver: make(chan []byte, 10)}
-	fmt.Fprintf(w, "Joined with Id:%s", id)
+	fmt.Fprintf(w, "Joined with Id:%s\n", id)
 }
 
 func Send(w http.ResponseWriter, r *http.Request) {
@@ -82,7 +82,7 @@ func Send(w http.ResponseWriter, r *http.Request) {
 	message := r.URL.Query().Get("message")
 	chat := fmt.Sprintf("Client %s: %s", id, message)
 	notify(chat)
-	fmt.Fprintf(w, "Message sent")
+	fmt.Fprintf(w, "Message sent\n")
 
 }
 func notify(data string) {
@@ -100,7 +100,7 @@ func Leave(w http.ResponseWriter, r *http.Request) {
 	}
 	chatBox.leaveChan <- id
 
-	fmt.Fprintf(w, "Removed ID: %s", id)
+	fmt.Fprintf(w, "Removed ID: %s\n", id)
 }
 
 func Messages(w http.ResponseWriter, r *http.Request) {
@@ -140,7 +140,7 @@ func Messages(w http.ResponseWriter, r *http.Request) {
 			if !idleTimer.Stop() {
 				<-idleTimer.C
 			}
-			idleTimer.Reset(120 * time.Second)
+			idleTimer.Reset(30 * time.Second)
 
 		case <-idleTimer.C:
 			fmt.Println("No activity...")
